@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,22 +46,18 @@ class PersonServiceImplTest {
     }
 
     @Test
-    @DisplayName("Will return -1 if person age > year")
-    void numberOfDeath_returnNegative1(){
-        Person person = new Person(13, 10);
-        int expectedNumber = -1;
-        int actualDeath = service.numberOfDeath(person);
-        assertEquals(expectedNumber, actualDeath);
-        log.info(RESPONSE_TEST, expectedNumber, actualDeath, Thread.currentThread().getStackTrace()[1].getMethodName());
-    }
+    @DisplayName("Add Person than set number of death with 1 person invalid data")
+    void addPerson_returnListOfPersonWithInvalidData(){
+        requests.add(new PersonRequest(16, 13));
 
-    @Test
-    @DisplayName("Will return 0 if person age == year")
-    void numberOfDeath_returnZero(){
-        Person person = new Person(10, 10);
-        int expectedNumber = 0;
-        int actualDeath = service.numberOfDeath(person);
-        assertEquals(expectedNumber, actualDeath);
-        log.info(RESPONSE_TEST, expectedNumber, actualDeath, Thread.currentThread().getStackTrace()[1].getMethodName());
+        int expectedDeath = 0;
+        List<Person> actualPersons = service.addPerson(requests);
+        actualPersons.stream().forEach(ap -> {
+            assertNotEquals(expectedDeath, ap.getNumberOfDeaths());
+            log.info(RESPONSE_TEST, expectedDeath, ap.getNumberOfDeaths(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        });
+
+        assertEquals(3, actualPersons.size());
+        log.info(RESPONSE_TEST, 3, actualPersons.size(), Thread.currentThread().getStackTrace()[1].getMethodName());
     }
 }

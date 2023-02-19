@@ -1,15 +1,13 @@
 package com.rivaldy.witchsaga.dto;
 
-import lombok.Data;
+import lombok.*;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
 public class StoryResponse {
 
     private Object given;
     private Object answer;
-
-    public StoryResponse(Object given, Object answer) {
-        this.given = given;
-        this.answer = answer;
-    }
 }

@@ -8,5 +8,4 @@ import java.util.List;
 public interface IPerson {
 
     List<Person> addPerson(List<PersonRequest> requests);
-    int numberOfDeath(Person person);
 }

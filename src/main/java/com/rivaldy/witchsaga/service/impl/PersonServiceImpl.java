@@ -17,15 +17,10 @@ public class PersonServiceImpl implements IPerson {
         List<Person> persons = new ArrayList<>();
         requests.forEach(r -> {
             Person person = new Person(r);
-            person.setNumberOfDeaths(numberOfDeath(person));
+            person.setNumberOfDeaths(new CalculateKilled().setNumberOfDeath(person));
             persons.add(person);
         });
 
         return persons;
-    }
-
-    @Override
-    public int numberOfDeath(Person person){
-        return new CalculateKilled().setNumberOfDeath(person);
     }
 }

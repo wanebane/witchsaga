@@ -2,8 +2,7 @@ package com.rivaldy.witchsaga.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rivaldy.witchsaga.constant.Message;
-import com.rivaldy.witchsaga.dto.PersonRequest;
-import com.rivaldy.witchsaga.dto.VillagerRequest;
+import com.rivaldy.witchsaga.dto.*;
 import com.rivaldy.witchsaga.service.IWitch;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,8 +21,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.rivaldy.witchsaga.constant.Message.ERR_REA_TOTAL_IS_NOT_MATCH;
+import static com.rivaldy.witchsaga.constant.Message.ERR_TOTAL_IS_NOT_MATCH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -57,11 +59,15 @@ class WitchControllerTest {
     }
 
     @Test
-    @DisplayName("Will throw error 404 when trying to send request body with invalid data")
+    @DisplayName("Will throw error 404 when trying to send request body with totalPerson = 0")
     void whenRequestBodyIsInvalid_thenReturnStatusBadRequest() throws Exception{
+        String method = Thread.currentThread().getStackTrace()[1].getMethodName();
+
         totalPerson = 0;
         request = new VillagerRequest(totalPerson, persons);
-        String expectedJson = "{\"success\":false,\"message\":\"Your request was invalid, please check this reasons!\",\"errorReason\":[\"Must set the value totalPerson more than 1\"]}";
+        ExceptionResponse expectedRes = new ExceptionResponse(false,
+                Message.ERR_DATA_BAD_REQUEST, List.of("Must set the value totalPerson more than 1"));
+        String expectedJson = objectMapper.writeValueAsString(expectedRes);
 
         String body = objectMapper.writeValueAsString(request);
 
@@ -73,17 +79,23 @@ class WitchControllerTest {
                 .andReturn();
 
         String actualJson = result.getResponse().getContentAsString();
+        ExceptionResponse actualRes = objectMapper.readValue(actualJson, ExceptionResponse.class);
 
         assertEquals(expectedJson, actualJson);
-        log.info(Message.RESPONSE_TEST, HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        assertEquals(expectedRes, actualRes);
+        log.info(Message.RESPONSE_TEST, HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus(), method);
     }
 
     @Test
     @DisplayName("Will throw error 409 when trying to send request body with total person is not equal to person size")
     void whenRequestTotalPersonIsNotEqualToPersonSize_thenReturnStatusConflict() throws Exception{
+        String method = Thread.currentThread().getStackTrace()[1].getMethodName();
+
         totalPerson = 3;
         request = new VillagerRequest(totalPerson, persons);
-        String expectedJson = "{\"success\":false,\"message\":\"Request totalPerson must be equal to size of persons list\",\"errorReason\":\"totalPerson 3 is not equal persons data 2\"}";
+
+        ExceptionResponse expectedRes = new ExceptionResponse(false, ERR_TOTAL_IS_NOT_MATCH, String.format(ERR_REA_TOTAL_IS_NOT_MATCH, totalPerson, persons.size()));
+        String expectedJson = objectMapper.writeValueAsString(expectedRes);
 
         String body = objectMapper.writeValueAsString(request);
 
@@ -95,25 +107,29 @@ class WitchControllerTest {
                 .andReturn();
 
         String actualJson = result.getResponse().getContentAsString();
-        assertEquals(expectedJson, actualJson);
+        ExceptionResponse actualRes = objectMapper.readValue(actualJson, ExceptionResponse.class);
 
-        log.info(Message.RESPONSE_TEST, HttpStatus.CONFLICT.value(), result.getResponse().getStatus(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        assertEquals(expectedJson, actualJson);
+        assertEquals(expectedRes, actualRes);
+
+        log.info(Message.RESPONSE_TEST, HttpStatus.CONFLICT.value(), result.getResponse().getStatus(), method);
     }
 
     @Test
     @DisplayName("Will get status 200 when trying to send valid request body")
     void whenRequestIsValid_thenReturnStatusOk() throws Exception{
+        String method = Thread.currentThread().getStackTrace()[1].getMethodName();
         request = new VillagerRequest(totalPerson, persons);
 
         String body = objectMapper.writeValueAsString(request);
-
         MvcResult result = mvc
                 .perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(body))
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andReturn();
 
-        log.info(Message.RESPONSE_TEST, HttpStatus.OK.value(), result.getResponse().getStatus(), Thread.currentThread().getStackTrace()[1].getMethodName());
+        log.info(Message.RESPONSE_TEST, HttpStatus.OK.value(), result.getResponse().getStatus(), method);
     }
 }
