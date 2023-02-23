@@ -44,3 +44,5 @@ server:
 ### Open Swagger UI
 
 Open new browser and paste this url `localhost:8085/api/v1/swagger-ui/index.html`
+
+### Response

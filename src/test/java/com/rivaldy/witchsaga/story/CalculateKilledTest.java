@@ -63,9 +63,13 @@ class CalculateKilledTest {
     }
 
     @Test
-    @DisplayName("Average death must return 4.5")
+    @DisplayName("Average death must return 7.0")
     void getAverageDeath_mustReturn4point5(){
-        double expectedResult = 4.5;
+        Person person1 = new Person(15, 20);
+        person1.setNumberOfDeaths(calc.setNumberOfDeath(person1));
+        persons.add(person1);
+
+        double expectedResult = 7.0;
         double actual = calc.getAverageDeath(persons);
         assertEquals(expectedResult, actual);
         log.info(RESPONSE, expectedResult, actual, Thread.currentThread().getStackTrace()[1].getMethodName());

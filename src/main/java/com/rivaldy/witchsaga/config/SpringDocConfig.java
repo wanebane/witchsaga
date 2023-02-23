@@ -17,7 +17,7 @@ public class SpringDocConfig {
     public Docket api(){
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.any())
+                .apis(RequestHandlerSelectors.basePackage("com.rivaldy.witchsaga.controller"))
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo());
